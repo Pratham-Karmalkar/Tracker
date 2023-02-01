@@ -10,6 +10,7 @@ import (
 	"github.com/Pratham-Karmalkar/Tracker/pkg/config"
 	"github.com/Pratham-Karmalkar/Tracker/pkg/utils"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/lib/pq"
 )
 
 var udb *sql.DB
@@ -47,10 +48,11 @@ func (u *User) CreateUser() (*User, int) {
 
 	} else {
 		//first name , lastname, hashed password and email are the only values passed here
-		_, err := udb.Query("Insert into Users (id_bin  , isActive , accountCreated , firstName, lastName ,email , pass ) values (unhex(replace(uuid(),'-','')),true,curdate(),?,?,?,?)", u.Fname, u.Lname, u.Email, hash)
+		_, err := udb.Query("Insert into Users (isActive , firstName, lastName ,email , pass ) values (true,$1,$2,$3,$4)", u.Fname, u.Lname, u.Email, hash)
 
 		if err != nil {
 			errStat = 1
+			fmt.Println(err)
 		}
 	}
 
@@ -62,7 +64,7 @@ func (u *User) LoginUser(email, pass string) (string, string, bool) {
 	var emailFromDB, passFromDB, id string
 
 	//For returning email  not found and and user should signup
-	if err := udb.QueryRow("Select id_text , email,pass from Users where email = ? ", email).Scan(&id, &emailFromDB, &passFromDB); err != nil {
+	if err := udb.QueryRow("Select id_text , email,pass from Users where email = $1 ", email).Scan(&id, &emailFromDB, &passFromDB); err != nil {
 		if err == sql.ErrNoRows {
 			fmt.Println(err)
 		}
@@ -80,7 +82,7 @@ func (u *User) LoginUser(email, pass string) (string, string, bool) {
 func (u *User) VerifyPassword(name, pass string) bool {
 	var passFromDB string
 
-	if err := udb.QueryRow("Select pass from Users where firstName = ? ", name).Scan(&passFromDB); err != nil {
+	if err := udb.QueryRow("Select pass from Users where firstName = $1 ", name).Scan(&passFromDB); err != nil {
 		if err == sql.ErrNoRows {
 			fmt.Println(err)
 		}

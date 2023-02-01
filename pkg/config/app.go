@@ -25,16 +25,19 @@ func Connect() {
 		fmt.Println("Error loading env")
 	}
 
-	var (
-		DB_USER     = os.Getenv("USER_NAME")
-		DB_PASS     = os.Getenv("PASS")
-		DB_PROTOCOL = os.Getenv("PROTOCOL")
-		DB_ADDRESS  = os.Getenv("ADDRESS")
-		DB_PORT     = os.Getenv("PORT")
-		DB_DATABASE = os.Getenv("DATABASE")
-	)
+	// var (
+	// 	DB_USER     = os.Getenv("USER_NAME")
+	// 	DB_PASS     = os.Getenv("PASS")
+	// 	DB_PROTOCOL = os.Getenv("PROTOCOL")
+	// 	DB_ADDRESS  = os.Getenv("ADDRESS")
+	// 	DB_PORT     = os.Getenv("PORT")
+	// 	DB_DATABASE = os.Getenv("DATABASE")
+	// )
 
-	d, err := sql.Open("mysql", DB_USER+":"+DB_PASS+"@"+DB_PROTOCOL+"("+DB_ADDRESS+":"+DB_PORT+")"+"/"+DB_DATABASE)
+	var (
+		connStr = os.Getenv("PSQL_CONN_STRING")
+	)
+	d, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err.Error())
 

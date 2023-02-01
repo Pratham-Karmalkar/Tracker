@@ -34,7 +34,7 @@ func (t *Transaction) DoTransaction(userid string) (*Transaction, error) {
 	//t.UserID = user.ID
 	//fmt.Println("userId: ", userid)
 
-	_, err := tdb.Exec("Insert into transactions (transactionid_bin, transaction_date, transaction_time, userid_bin , amount , tags) values (unhex(replace(uuid(),'-','')), curdate() , curtime()  , unhex(replace(?,'-','')) , ?, ?)", userid, t.Amount, t.Tag)
+	_, err := tdb.Exec("Insert into transactions (userid_text  , amount , tags) values ($1, $2, $3)", userid, t.Amount, t.Tag)
 
 	if err != nil {
 		fmt.Println(err)
@@ -49,7 +49,7 @@ func (t *Transaction) TotalAmount(userid string) int {
 
 	var totalAmount int
 
-	if err := tdb.QueryRow("Select Sum(amount) from Transactions where userid_text = ?", userid).Scan(&totalAmount); err != nil {
+	if err := tdb.QueryRow("Select Sum(amount) from Transactions where userid_text = $1", userid).Scan(&totalAmount); err != nil {
 		fmt.Println(err)
 	}
 	return totalAmount
